@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploy - Jogo de 11 Cartas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 15px;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f4ff;
+        }
+
+        .upload-area.dragover {
+            background: #e8eaf6;
+            border-color: #764ba2;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .file-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ddd;
+        }
+
+        .file-name {
+            color: #333;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .file-size {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        .deploy-options {
+            margin: 20px 0;
+        }
+
+        .option {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        label {
+            cursor: pointer;
+            color: #333;
+            margin: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f4ff;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            min-width: auto;
+            flex: none;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .links-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .link-btn:hover {
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .guide {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #1565c0;
+        }
+
+        .guide h3 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+
+        .guide ol, .guide ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .guide li {
+            margin: 5px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-bar.show {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Deploy do Programa</h1>
+        <p class="subtitle">Jogo de 11 Cartas - Suba seu programa</p>
+
+        <!-- Seção de Upload -->
+        <div class="section">
+            <h2><span class="icon">📤</span> 1. Upload do Programa</h2>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-text">📁 Clique ou arraste arquivos aqui</div>
+                <div class="upload-hint">Suporte: .html, .js, .css, .json (máx 10MB)</div>
+                <input type="file" id="fileInput" multiple accept=".html,.js,.css,.json,.zip">
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Seção de Configuração de Deploy -->
+        <div class="section">
+            <h2><span class="icon">⚙️</span> 2. Configurações de Deploy</h2>
+            
+            <div class="deploy-options">
+                <div class="option">
+                    <input type="checkbox" id="minify" checked>
+                    <label for="minify">Minificar código (CSS/JS)</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="compress" checked>
+                    <label for="compress">Compactar imagens</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="git">
+                    <label for="git">Fazer commit no Git</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Deploy -->
+        <div class="section">
+            <h2><span class="icon">🌐</span> 3. Escolha o Destino</h2>
+            
+            <div class="links-section">
+                <button class="link-btn" onclick="deployTo('github-pages')">
+                    <span>🐙</span> GitHub Pages
+                </button>
+                <button class="link-btn" onclick="deployTo('netlify')">
+                    <span>☁️</span> Netlify
+                </button>
+                <button class="link-btn" onclick="deployTo('vercel')">
+                    <span>▲</span> Vercel
+                </button>
+                <button class="link-btn" onclick="deployTo('heroku')">
+                    <span>⚡</span> Heroku
+                </button>
+                <button class="link-btn" onclick="deployTo('local')">
+                    <span>💾</span> Deploy Local
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção de Ações Rápidas -->
+        <div class="section">
+            <h2><span class="icon">⚡</span> 4. Ações Rápidas</h2>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="startDeploy()">
+                    🚀 Deploy Agora
+                </button>
+                <button class="btn-secondary" onclick="clearFiles()">
+                    🗑️ Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Guia de Deployment -->
+        <div class="guide">
+            <h3>📚 Guia Rápido</h3>
+            <ol>
+                <li><strong>Prepare os arquivos:</strong> Certifique-se que seu index.html e dependências estão prontos</li>
+                <li><strong>Faça upload:</strong> Selecione os arquivos do seu projeto</li>
+                <li><strong>Configure:</strong> Escolha as opções de otimização desejadas</li>
+                <li><strong>Escolha o destino:</strong> Clique no serviço onde deseja fazer deploy</li>
+                <li><strong>Execute:</strong> Clique em "Deploy Agora" e aguarde</li>
+            </ol>
+        </div>
+
+        <!-- Mensagem de Status -->
+        <div class="status-message" id="statusMessage"></div>
+    </div>
+
+    <script>
+        let uploadedFiles = [];
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const statusMessage = document.getElementById('statusMessage');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        // Configurar eventos de drag and drop
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['text/html', 'text/javascript', 'text/css', 'application/json', 'application/zip'];
+
+            for (let file of files) {
+                if (file.size > maxSize) {
+                    showStatus(`Arquivo ${file.name} excede o tamanho máximo (10MB)`, 'error');
+                    continue;
+                }
+
+                uploadedFiles.push(file);
+                addFileToList(file);
+            }
+
+            showStatus(`${uploadedFiles.length} arquivo(s) carregado(s) com sucesso!`, 'success');
+        }
+
+        function addFileToList(file) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div>
+                    <div class="file-name">📄 ${file.name}</div>
+                    <div class="file-size">${(file.size / 1024).toFixed(2)} KB</div>
+                </div>
+                <button class="btn-small btn-secondary" onclick="removeFile('${file.name}')">
+                    ✕ Remover
+                </button>
+            `;
+            fileList.appendChild(fileItem);
+        }
+
+        function removeFile(fileName) {
+            uploadedFiles = uploadedFiles.filter(f => f.name !== fileName);
+            document.querySelectorAll('.file-item').forEach(item => {
+                if (item.querySelector('.file-name').textContent.includes(fileName)) {
+                    item.remove();
+                }
+            });
+            showStatus(`Arquivo removido: ${fileName}`, 'info');
+        }
+
+        function clearFiles() {
+            uploadedFiles = [];
+            fileList.innerHTML = '';
+            fileInput.value = '';
+            showStatus('Arquivos limpos', 'info');
+        }
+
+        function deployTo(platform) {
+            if (uploadedFiles.length === 0) {
+                showStatus('Por favor, faça upload de arquivos primeiro!', 'warning');
+                return;
+            }
+
+            const platformInfo = {
+                'github-pages': {
+                    name: 'GitHub Pages',
+                    url: 'https://pages.github.com/',
+                    steps: [
+                        'Crie um repositório GitHub (ou use o existente)',
+                        'Coloque os arquivos na branch main ou em uma pasta docs/',
+                        'Vá em Settings > Pages e ative GitHub Pages',
+                        'Seu site estará em: https://seu-usuario.github.io/seu-repositorio'
+                    ]
+                },
+                'netlify': {
+                    name: 'Netlify',
+                    url: 'https://app.netlify.com/',
+                    steps: [
+                        'Acesse https://app.netlify.com/drop',
+                        'Arraste sua pasta do projeto ou faça upload do ZIP',
+                        'Seu site estará pronto em minutos com URL automática',
+                        'Conecte seu repositório Git para deploys automáticos'
+                    ]
+                },
+                'vercel': {
+                    name: 'Vercel',
+                    url: 'https://vercel.com/new',
+                    steps: [
+                        'Acesse https://vercel.com/new',
+                        'Importe seu repositório GitHub',
+                        'Configure e faça deploy com um clique',
+                        'Seu site terá domínio próprio automático'
+                    ]
+                },
+                'heroku': {
+                    name: 'Heroku',
+                    url: 'https://dashboard.heroku.com/',
+                    steps: [
+                        'Crie uma conta no Heroku',
+                        'Instale o Heroku CLI em sua máquina',
+                        'Execute: heroku create seu-app-name',
+                        'Execute: git push heroku main'
+                    ]
+                },
+                'local': {
+                    name: 'Deploy Local',
+                    url: '#',
+                    steps: [
+                        'Exporte os arquivos carregados',
+                        'Copie para sua pasta de produção',
+                        'Inicie um servidor local: python -m http.server 8000',
+                        'Acesse: http://localhost:8000'
+                    ]
+                }
+            };
+
+            const info = platformInfo[platform];
+            let message = `\n🌐 ${info.name}\n\n`;
+            message += `📍 Portal: ${info.url}\n\n`;
+            message += `📋 Passos:\n`;
+            info.steps.forEach((step, i) => {
+                message += `${i + 1}. ${step}\n`;
+            });
+
+            alert(message);
+            showStatus(`Deploy para ${info.name} iniciado!`, 'success');
+        }
+
+        function startDeploy() {
+            if (uploadedFiles.length === 0) {
+                showStatus('Nenhum arquivo para fazer deploy!', 'warning');
+                return;
+            }
+
+            const minify = document.getElementById('minify').checked;
+            const compress = document.getElementById('compress').checked;
+            const git = document.getElementById('git').checked;
+
+            progressBar.classList.add('show');
+            showStatus('Preparando deploy...', 'info');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) progress = 100;
+                progressFill.style.width = progress + '%';
+
+                if (progress === 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressBar.classList.remove('show');
+                        showStatus(
+                            `✅ Arquivos prontos para deploy!\n` +
+                            `📦 ${uploadedFiles.length} arquivo(s)\n` +
+                            `⚙️ Minify: ${minify ? 'Sim' : 'Não'}\n` +
+                            `🖼️ Compressão: ${compress ? 'Sim' : 'Não'}\n` +
+                            `📝 Git: ${git ? 'Sim' : 'Não'}\n\n` +
+                            `Escolha um destino acima para continuar!`,
+                            'success'
+                        );
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message show status-${type}`;
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusMessage.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // Mensagem de boas-vindas
+        window.addEventListener('load', () => {
+            showStatus('Bem-vindo ao Deploy! Comece fazendo upload dos seus arquivos.', 'info');
+        });
+    </script>
+</body>
+</html>

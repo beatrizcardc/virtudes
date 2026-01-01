@@ -1,0 +1,145 @@
+/* --- Estilos Gerais --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #2c3e50; /* Cor de fundo azul escuro */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+/* --- O Tabuleiro (Grid de Cartas) --- */
+#game-board {
+    display: flex;
+    flex-wrap: wrap; /* Permite que as cartas quebrem linha */
+    gap: 15px; /* Espaço entre as cartas */
+    justify-content: center;
+    max-width: 900px;
+}
+
+/* --- Estrutura da Carta (As pequenas no tabuleiro) --- */
+.card-slot {
+    width: 150px;
+    height: 200px;
+    perspective: 1000px; /* Necessário para o efeito 3D de virar */
+    cursor: pointer;
+}
+
+/* Classe adicionada via JS para esconder cartas já clicadas */
+.card-slot.used {
+    visibility: hidden; /* Fica invisível, mas mantém o espaço ocupado */
+    pointer-events: none; /* Impede novos cliques */
+}
+
+/* O container interno que realmente gira */
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s; /* Duração da animação de virar */
+    transform-style: preserve-3d; /* Mantém o 3D durante a rotação */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    border-radius: 10px;
+}
+
+/* Estilos comuns para a Frente e o Verso */
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Esconde o lado de trás no Safari */
+    backface-visibility: hidden; /* Esconde o lado de trás */
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilo específico da Frente */
+.card-front {
+    background-color: #ecf0f1;
+}
+
+/* A imagem deve ocupar todo o espaço da frente */
+.card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Garante que a imagem cubra a área sem distorcer demais */
+}
+
+/* Estilo específico do Verso */
+.card-back {
+    background-color: #3498db; /* Cor azul para o verso */
+    color: white;
+    transform: rotateY(180deg); /* O verso começa virado para trás */
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 3.0rem;
+    font-weight: bold;
+}
+
+/* --- Overlay (A camada escura de fundo quando amplia) --- */
+#overlay {
+    position: fixed; /* Fica fixo na tela, por cima de tudo */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.85); /* Fundo preto transparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100; /* Garante que fique no topo */
+    
+    /* Começa invisível */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s; /* Animação suave para aparecer/sumir */
+}
+
+/* Quando o JS adiciona a classe .active, o overlay aparece */
+#overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- A Carta Grande (Ativa) no centro --- */
+#active-card {
+    width: 300px; /* Dobro do tamanho original */
+    height: 400px;
+    perspective: 1000px;
+    cursor: pointer;
+    
+    /* Estado inicial (antes do zoom) */
+    transform: scale(0.8); 
+    transition: transform 0.3s ease-out; /* Animação suave do zoom */
+}
+
+/* Quando o overlay está ativo, a carta dá zoom para o tamanho normal (1) */
+#overlay.active #active-card {
+        transform: scale(1);
+}
+
+/* Quando o JS adiciona a classe .flipped, a carta grande vira */
+#active-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+/* --- Mensagem de fim de jogo --- */
+#game-over-message {
+    display: none; /* Começa escondida */
+    font-size: 2rem;
+    color: #2ecc71; /* Cor verde */
+    margin-top: 30px;
+    text-align: center;
+}
